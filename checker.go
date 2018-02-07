@@ -14,7 +14,7 @@ func main() {
 	start := time.Now()
 	ch := make(chan string)
 
-	fmt.Println("Checking sites for: %q", os.Args[2])
+	fmt.Printf("Checking sites for: %q\n", os.Args[2])
 
 	sourceList, err := os.Open(os.Args[1])
 	if err != nil {
