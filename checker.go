@@ -2,8 +2,8 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -44,21 +44,22 @@ func fetch(url string, ch chan<- string) {
 		ch <- fmt.Sprint(err)
 		return
 	}
+	defer resp.Body.Close()
 
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(resp.Body)
-	responseString := buf.String()
+	responseString, err := ioutil.ReadAll(resp.Body)
 
-	resp.Body.Close()
 	if err != nil {
 		ch <- fmt.Sprintf("while raeding %s: %v", url, err)
 		return
 	}
 	secs := time.Since(start).Seconds()
 
-	if strings.Contains(responseString, os.Args[2]) {
+	if strings.Contains(string(responseString), os.Args[2]) {
 		ch <- fmt.Sprintf("\033[0;33m%.2fs\033[0m %s \t \033[0;32m=> Found\033[0m", secs, url)
 	} else {
 		ch <- fmt.Sprintf("\033[0;33m%.2fs\033[0m %s", secs, url)
 	}
+
+	ch <- fmt.Sprintf("\033[0;33m%.2fs\033[0m %s", secs, url)
+
 }
